@@ -189,7 +189,6 @@ class _LoginScreenState extends State<LoginScreen> {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      // Supondo que 'urlAUX' seja sua variável de URL da API.
       final response = await http.get(Uri.parse('$urlAUX/health_check'));
 
       // Se a API não estiver acessível, faça logout e informe o usuário.
