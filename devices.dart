@@ -162,7 +162,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchSensorData() async {
     final user = FirebaseAuth.instance.currentUser;
     final userId = user?.uid;
-    // Supondo que userId é passado para esta função
     final apiURL = Uri.parse('$urlAUX/sensor?userId=$userId');
 
     try {
@@ -215,7 +214,6 @@ class _HomeScreenState extends State<HomeScreen> {
         print(
             'UserId: $userId, FirestoreId: ${device.firestoreId}, Index: $index');
 
-        // Encode the device.firestoreId
         final encodedDeviceName = Uri.encodeComponent(device.firestoreId);
 
         final apiURL = '$urlAUX/devices/$userId/$encodedDeviceName';
@@ -437,7 +435,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void updateDeviceWithIndex(Device updatedDevice, int deviceIndex) {
     setState(() {
       devices[deviceIndex] =
-          updatedDevice; // Update the device at the given index
+          updatedDevice; 
     });
   }
 
@@ -985,13 +983,11 @@ class _DeviceControlDialogState extends State<DeviceControlDialog> {
           Map<String, dynamic> data =
               Map<String, dynamic>.from(event.snapshot.value as Map);
 
-          // Defina as variáveis com os valores recuperados
           bool turnOn = data['turnOn'] ??
-              false; // Substitua 'false' pelo valor padrão esperado
+              false;
           String status =
-              data['status'] ?? ''; // Substitua '' pelo valor padrão esperado
+              data['status'] ?? '';
 
-          // Agora que você tem os valores, atualize o estado do dispositivo
           await _updateDeviceStateBasedOnSchedule(turnOn, status);
         }
       }
@@ -1011,13 +1007,11 @@ class _DeviceControlDialogState extends State<DeviceControlDialog> {
   }
 
   Future<void> _handlePastScheduledTime(SharedPreferences prefs) async {
-    // Obtenha uma instância do banco de dados e uma referência para o caminho desejado
     final user = FirebaseAuth.instance.currentUser;
     final userId = user?.uid;
     DatabaseReference ref =
         FirebaseDatabase.instance.ref("users/$userId/air_conditioner_schedule");
 
-    // Ouça as mudanças de valor uma única vez, se isso deve ser reativo, considere colocar em um lugar mais apropriado
     DatabaseEvent event = await ref.once();
     print(event.snapshot.value); // O valor dos dados
 
@@ -1160,8 +1154,6 @@ class _DeviceControlDialogState extends State<DeviceControlDialog> {
         // Callback chamado quando o stream é fechado.
         print('[DEBUG] A transmissão está fechada agora.');
       },
-      // adicionar 'cancelOnError: true' se quiser que a assinatura seja cancelada automaticamente em caso de erro.
-      // cancelOnError: true,
     );
   }
 
@@ -1206,7 +1198,7 @@ class _DeviceControlDialogState extends State<DeviceControlDialog> {
         });
         print('[DEBUG] Estado do ar condicionado para: $_isOn');
         await _saveDeviceStateToDevicePreferences(widget.device.firestoreId);
-        // Notifique o widget pai sobre a atualização para que ele possa lidar com o estado global ou outras lógicas necessárias.
+        // Notifique o widget pai sobre a atualização para que ele possa lidar com o estado global.
         widget.updateDevice(widget.device.copyWith(isOn: _isOn));
         print('[DEBUG] Dispositivo (ar) atualizado com estado: $_isOn');
       }
@@ -1233,7 +1225,6 @@ class _DeviceControlDialogState extends State<DeviceControlDialog> {
 
   Future<void> _setTemperature(int desiredTemperature) async {
     try {
-      // Aqui você faz a chamada à sua API, que por sua vez, comunica-se com o ESP32
       var response = await http.post(
         Uri.parse('$urlAUX/airconditioner/set_temperatura_$desiredTemperature'),
       );
@@ -1268,7 +1259,6 @@ class _DeviceControlDialogState extends State<DeviceControlDialog> {
     final user = FirebaseAuth.instance.currentUser;
     final userId = user?.uid;
     if (userId == null) {
-      // Trate o caso em que o userId é nulo
       return;
     }
     const String apiURL = "$urlAUX/schedule_air_conditioner";
@@ -1305,16 +1295,14 @@ class _DeviceControlDialogState extends State<DeviceControlDialog> {
   }
 
   Future<void> _toggleTV(bool isOn) async {
-    // Tente atualizar o estado na API primeiro.
     final response =
         await http.post(Uri.parse('$urlAUX/dispositivo/tv/energia'));
 
-    // Se a chamada para a API foi bem-sucedida, atualize o estado local.
+    // Se a chamada para a API foi bem-sucedida, logo será atualizado o estado local.
     if (response.statusCode == 200) {
       setState(() {
-        _isOn = isOn; // Agora o estado é alterado localmente.
+        _isOn = isOn; 
       });
-      // Aqui você sincroniza o estado com seu dispositivo/widget.
       await _saveDeviceStateToDevicePreferences(widget.device.firestoreId);
       widget.updateDevice(widget.device.copyWith(isOn: _isOn));
     } else {
@@ -1338,8 +1326,8 @@ class _DeviceControlDialogState extends State<DeviceControlDialog> {
     return IconButton(
       icon: Icon(icon),
       onPressed: onPressed,
-      color: Colors.blueAccent, // ou outra cor de sua escolha
-      iconSize: 30, // ajuste conforme necessário
+      color: Colors.blueAccent, 
+      iconSize: 30, 
     );
   }
 
@@ -1465,7 +1453,6 @@ class _DeviceControlDialogState extends State<DeviceControlDialog> {
       widget
           .updateDevice(widget.device.copyWith(currentVolume: _currentVolume));
     } else {
-      // Se algo deu errado, você pode informar o usuário aqui, se desejar.
       print('[DEBUG] Erro ao aumentar o volume');
       print('[DEBUG] HTTP Status: ${response.statusCode}');
       // Se a chamada da API falhou..
@@ -1501,12 +1488,11 @@ class _DeviceControlDialogState extends State<DeviceControlDialog> {
     final response = await http.post(Uri.parse('$urlAUX/dispositivo/tv/mudo'),
         body: {'isMuted': newMuteState.toString()});
 
-    // Se a chamada para a API foi bem-sucedida, atualize o estado local.
+    // Se a chamada para a API foi bem-sucedida, logo será atualizado o estado local.
     if (response.statusCode == 200) {
       setState(() {
-        _isMuted = newMuteState; // Agora o estado é alterado localmente.
+        _isMuted = newMuteState;
       });
-      // Sincronize o estado com seu dispositivo/widget.
       await _saveDeviceStateToDevicePreferences(widget.device.firestoreId);
       widget.updateDevice(widget.device.copyWith(isMuted: _isMuted));
     } else {
@@ -1531,7 +1517,6 @@ class _DeviceControlDialogState extends State<DeviceControlDialog> {
     final String uri = '$urlAUX$endpoint';
 
     try {
-      // Consider using http.post or http.put if you're changing the state.
       final response = await http.get(Uri.parse(uri));
       if (response.statusCode == 200) {
         print(
@@ -1635,7 +1620,6 @@ class _DeviceControlDialogState extends State<DeviceControlDialog> {
   Future<void> _getPowerOutletStatus() async {
     final user = FirebaseAuth.instance.currentUser;
     final userId = user?.uid;
-    // Supondo que userId é passado para esta função
     final String uri = '$urlAUX/get_status?userId=$userId';
 
     try {
@@ -1657,7 +1641,7 @@ class _DeviceControlDialogState extends State<DeviceControlDialog> {
           _voltage = ((data['result'].firstWhere(
                       (e) => e['code'] == 'cur_voltage')['value'] as int) /
                   10)
-              .toDouble(); // Ajuste conforme necessário
+              .toDouble();
         });
       } else {
         print('[DEBUG] Erro ao obter status: ${response.body}');
@@ -1839,13 +1823,11 @@ class _DeviceControlDialogState extends State<DeviceControlDialog> {
                                 },
                               );
 
-                              // Check if the dialog was not dismissed
                               if (turnOn != null) {
-                                // If the user made a selection, proceed to schedule the air conditioner command
                                 await _scheduleAirConditionerCommand(
                                     turnOn, pickedTime);
                               }
-                            } // This closes the 'if (mounted)' block
+                            } 
                           }
                         }),
                   ] else if (widget.device.type == DeviceType.lampada) ...[
